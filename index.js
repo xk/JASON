@@ -85,6 +85,7 @@
     seen= [];
     paths= [];
     cyclic= [];
+    ademas= [];
     
     var r= strfy(o, 'o');
     if (cyclic.length || ademas.length) {

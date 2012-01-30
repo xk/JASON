@@ -158,3 +158,22 @@ assert(oo[1] === Array);
 assert(oo[2] === Object.prototype);
 assert(oo[3] === Array.prototype.push);
 
+//Additional properties
+
+//Issue #1 BEGIN
+console.log("\n\n******* Issue #1\n\n");
+
+ƒ.k= 27;
+o= ƒ;
+oo= JASON.stringify(o);
+console.log(o,oo);
+assert(oo === '(function(o){\n  ;\n  o["k"]= 27;\n  return o;\n})(function ƒ(){});');
+
+
+delete ƒ.k;
+o= ƒ;
+oo= JASON.stringify(o);
+console.log(o,oo);
+assert(oo === 'function ƒ(){}');
+
+//Issue #1 END
