@@ -1,7 +1,7 @@
 {
   "name": "JASON",
   "description": "JSON-like parser/formatter to pass objects between processes and/or threads",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Jorge Chamorro Bieling",
   "main": "index.js"
 }
