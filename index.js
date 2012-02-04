@@ -266,6 +266,6 @@
   
   
   exports.parse = function(t) {
-    return eval(t);
+    return eval( '('+ t+ ')' );
   }
 })(typeof exports !== 'undefined' ? exports : (window.JASON = window.JASON || {}));
