@@ -5,26 +5,33 @@
   'use strict';
 
   var builtInPaths= [
-    'Object',
-    'Function',
-    'Array',
-    'String',
-    'Boolean',
-    'Number',
-    'Math',
-    'Date',
-    'RegExp',
-    'Error',
-    'JSON',
-    'Object.prototype',
-    'Function.prototype',
-    'Array.prototype',
-    'String.prototype',
-    'Boolean.prototype',
-    'Number.prototype',
-    'Date.prototype',
-    'RegExp.prototype',
-    'Error.prototype'
+    'Array',          'Array.prototype',
+    'Boolean',        'Boolean.prototype',
+    'Date',           'Date.prototype',
+    'Error',          'Error.prototype',
+    'EvalError',      'EvalError.prototype',
+    'Function',       'Function.prototype',
+    'Map',            'Map.prototype',
+    'Number',         'Number.prototype',
+    'Object',         'Object.prototype',
+    'Proxy',          'Proxy.prototype',
+    'RangeError',     'RangeError.prototype',
+    'ReferenceError', 'ReferenceError.prototype',
+    'RegExp',         'RegExp.prototype',
+    'Set',            'Set.prototype',
+    'String',         'String.prototype',
+    'SyntaxError',    'SyntaxError.prototype',
+    'TypeError',      'TypeError.prototype',
+    'URIError',       'URIError.prototype',
+    'WeakMap',        'WeakMap.prototype',
+    
+    'Math', 'JSON', 'eval',
+    
+    'decodeURI',  'decodeURIComponent',
+    'encodeURI',  'encodeURIComponent',
+    'escape',     'unescape',
+    'isFinite',   'isNaN',
+    'parseFloat', 'parseInt'
   ];
   var builtInObjects= builtInPaths.map(function (v,i,o) {
     'use strict';
@@ -111,6 +118,9 @@
           else if (char === 34) {
             oo+= '\\"';
           }
+          else if (char === 91) {
+            oo+= '\\\\';
+          }
           else {
             oo+= o[i];
           }
@@ -175,6 +185,7 @@
     //functions
     if (type === 'function') {
       var defaultKeys= Object.getOwnPropertyNames(function(){});
+      var nativeCode = (Object+'').replace('Object','');
       var keys= Object.getOwnPropertyNames(o).filter(function (v,i,o) {
         return (defaultKeys.indexOf(v) < 0);
       });
@@ -183,6 +194,10 @@
         var p= '[\"'+ k+ '\"]';
         ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
       });
+      
+      if ((o+'').replace(o.name,'') === nativeCode) {
+        return (o+'').replace(/(\[native code\])/, '"$1";');
+      }
       
       return (o.name) ? ''+ o : '('+ o+ ')';
     }
