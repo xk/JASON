@@ -1,23 +1,10 @@
-// Copyright (c) 2012 Jorge Chamorro Bieling  <jorge@jorgechamorro.com>
+// Copyright (c) 2011 Jorge Chamorro Bieling  <jorge@jorgechamorro.com>
 // MIT License
+
 (function (exports) {
   'use strict';
-  
-  var OphOP= Object.prototype.hasOwnProperty;
-  function hOP (k,o) {
-    return OphOP.call(o,k);
-  }
-  
-  var builtInsPaths= [];
-  var builtIns= [];
-  
-  var seen= [];
-  var paths= [];
-  var cyclic= [];
-  var ademas= [];
-  
-  var provO= [];
-  var provP= [
+
+  var builtInPaths= [
     'Object',
     'Function',
     'Array',
@@ -39,74 +26,78 @@
     'RegExp.prototype',
     'Error.prototype'
   ];
-  
-  
-  var i= 0;
-  while (i < provP.length) {
-    provO[i]= eval(provP[i]);
-    i++;
-  }
-  
-  var i= 0;
-  while (i < provO.length) {
-    seen= [];
-    paths= [];
-    cyclic= [];
-    ademas= [];
-    //process.stdout.write('Analizando -> '+ provP[i]+ '\n');
+  var builtInObjects= builtInPaths.map(function (v,i,o) {
+    'use strict';
+    return eval(v);
+  });
+
+  var seen, paths, i= 0;
+  while (i < builtInObjects.length) {
+    //process.stdout.write('Analizando -> '+ builtInPaths[i]+ '\n');
     
-    strfy(provO[i], provP[i]);
+    strfy(builtInObjects[i], builtInPaths[i], [], [], seen= [], paths= [], [], []);
     
     //console.log(seen);
     //console.log(paths);
-    //console.log(cyclic);
     
     seen.forEach(function (v,i,o) {
+      'use strict';
       //process.stdout.write('Comprobando -> '+ paths[i]+ '\n');
-      var where= provO.indexOf(v);
+      var where= builtInObjects.indexOf(v);
       if (where < 0) {
-        provO.push(seen[i]);
-        provP.push(paths[i]);
+        builtInPaths.push(paths[i]);
+        builtInObjects.push(seen[i]);
         //process.stdout.write('Añadido -> '+ paths[i]+ '\n');
       }
     });
     i++;
   }
-  
-  //console.log('\n\n\n ************ \n\n\n');
-  //console.log(provP);
-  //console.log('\n\n\n ************ \n\n\n');
-  //console.log('DONE -> '+ provP.length);
-  
-  var builtInsPaths= provP;
-  var builtIns= provO;
-  
-  exports.stringify = function(o) {
-    seen= [];
-    paths= [];
-    cyclic= [];
-    ademas= [];
-    
-    var r= strfy(o, 'o');
-    if (cyclic.length || ademas.length) {
-      return '(function(o){\n  '+ cyclic.join(';\n  ')+ ';\n  '+ ademas.join(';\n  ')+ ';\n  return o;\n})('+ r+ ');';
-    }
-    else {
-      return r;
-    }
-  }
-  
-  function strfy (o, path) {
-    function isPrimitive (type, o) {
-      return ((type === 'number') || (type === 'string') || (type === 'undefined') || (o === null) || (type === 'boolean'));
-    }
 
+  //console.log('\n\n\n ************ \n\n\n');
+  //console.log(builtInPaths);
+  //console.log('\n\n\n ************ \n\n\n');
+  //console.log('DONE -> '+ builtInPaths.length);
+
+  seen= paths= null;
+
+  function stringify (o) {
+    'use strict';
+    var cyclic, ademas;
+    var r= strfy(o, 'o', builtInObjects, builtInPaths, [], [], cyclic= [], ademas= []);
+    
+    if (cyclic.length || ademas.length) {
+      
+      var txt= '(function(o){\n';
+      
+      if (ademas.length) {
+        txt+= "//Additional properties\n"+ ademas.join(';\n');
+      }
+      
+      if (cyclic.length) {
+        txt+= "//Cyclic properties\n"+ cyclic.join(';\n');
+      }
+      
+      return txt+ '\nreturn o;\n})('+ r+ ')';
+    }
+    
+    return r;
+  }
+
+
+  function isPrimitive (type, o) {
+    'use strict';
+    return ((type === 'number') || (type === 'string') || (type === 'undefined') || (o === null) || (type === 'boolean'));
+  }
+
+
+  function strfy (o, path, builtInObjects, builtInPaths, seen, paths, cyclic, ademas) {
+    'use strict';
+    
     var type= typeof o;
     if (isPrimitive(type, o)) {
-      if (type === 'number') {
-        return ''+ o;
-      }
-
+      if (type === 'number') return ''+ o;
+      if (type === 'undefined') return 'undefined';
+      if (type === 'boolean') return o ? 'true' : 'false';
       if (type === 'string') {
         var i= 0;
         var oo= '';
@@ -128,21 +119,11 @@
         return '\"'+ oo+ '\"';
       }
 
-      if (type === 'undefined') {
-        return 'undefined';
-      }
-
-      if (type === 'boolean') {
-        return o ? 'true' : 'false';
-      }
-
       return 'null';
     }
 
-    var where= builtIns.indexOf(o);
-    if (where >= 0) {
-      return builtInsPaths[where];
-    }
+    var where= builtInObjects.indexOf(o);
+    if (where >= 0) return builtInPaths[where];
     
     where= seen.indexOf(o);
     if (where >= 0) {
@@ -155,7 +136,7 @@
       seen.push(o);
       paths.push(path);
     }
-    
+
     //Arrays
     if (Array.isArray(o)) {
       var i= 0;
@@ -169,7 +150,7 @@
         var where= keys.indexOf(''+ i);
         if (where >= 0) {
           delete keys[where];
-          t.push(strfy(o[i], path+ '['+ i+ ']'));
+          t.push(strfy(o[i], path+ '['+ i+ ']', builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
         }
         else {
           t.push('');
@@ -184,7 +165,7 @@
       //Propiedades adicionales
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
-        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p));
+        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
       });
       
       
@@ -200,7 +181,7 @@
       
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
-        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p));
+        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
       });
       
       return (o.name) ? ''+ o : '('+ o+ ')';
@@ -215,12 +196,12 @@
       
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
-        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p));
+        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
       });
       
       return 'new Date('+ (+o)+ ')';
     }
-    
+
     //Booleans
     if (Boolean.prototype.isPrototypeOf(o)) {
       var defaultKeys= Object.getOwnPropertyNames(new Boolean());
@@ -230,12 +211,12 @@
       
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
-        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p));
+        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
       });
       
       return ''+ o;
     }
-    
+
     //RegExps
     if (RegExp.prototype.isPrototypeOf(o)) {
       var defaultKeys= Object.getOwnPropertyNames(/a/);
@@ -245,27 +226,31 @@
       
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
-        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p));
+        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
       });
       
       return ''+ o;
     }
-    
+
     //Objects
     var defaultKeys= Object.getOwnPropertyNames({});
     var keys= Object.getOwnPropertyNames(o).filter(function (v,i,o) {
       return (defaultKeys.indexOf(v) < 0);
     });
-    
+
     var t= [];
     keys.forEach(function (k) {
-      t.push('\"'+ k+ '\":'+ strfy(o[k], path+ '[\"'+ k+ '\"]'));
+      t.push('\"'+ k+ '\":'+ strfy(o[k], path+ '[\"'+ k+ '\"]', builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
     });
     return '{'+ t.join(',')+ '}';
   }
-  
-  
-  exports.parse = function(t) {
+
+
+  function parse (t) {
     return eval( '('+ t+ ')' );
   }
+  
+  exports.stringify= stringify;
+  exports.parse= parse;
+  
 })(typeof exports !== 'undefined' ? exports : (window.JASON = window.JASON || {}));
