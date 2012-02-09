@@ -118,6 +118,9 @@
           else if (char === 34) {
             oo+= '\\"';
           }
+          else if (char === 91) {
+            oo+= '\\\\';
+          }
           else {
             oo+= o[i];
           }
