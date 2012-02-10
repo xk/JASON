@@ -85,14 +85,14 @@
       var txt= '(function(o){\n';
       
       if (ademas.length) {
-        txt+= "//Additional properties\n"+ ademas.join(';\n');
+        txt+= "/* Additional properties */\n"+ ademas.join(';\n')+ ';\n';
       }
       
       if (cyclic.length) {
-        txt+= "//Cyclic properties\n"+ cyclic.join(';\n');
+        txt+= "/* Cyclic properties */\n"+ cyclic.join(';\n')+ ';\n';
       }
       
-      return txt+ '\nreturn o;\n})('+ r+ ')';
+      return txt+ 'return o;\n})('+ r+ ')';
     }
     
     return r;
@@ -147,7 +147,7 @@
     if (where >= 0) {
       //console.log('*** SEEN   -> '+ paths[where]);
       cyclic.push(path+ '= '+ paths[where]);
-      return '\"'+ paths[where].replace(/\"/g, '')+ '\"';
+      return '"&'+ paths[where].replace(/\"/g, '')+ '"';
     }
     else {
       //console.log('*** Unseen -> '+ path);
