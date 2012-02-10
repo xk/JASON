@@ -270,8 +270,7 @@
 
 
   function parse (t) {
-    'use strict';
-    return eval( '('+ t+ ')' );
+    return Function("t", "return eval( '('+ t+ ')' );")(t);
   }
   
   exports.stringify= stringify;
