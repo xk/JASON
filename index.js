@@ -3,39 +3,47 @@
 
 (function (exports) {
   'use strict';
-
+  
+  var builtInObjects= [];
   var builtInPaths= [
-    'Array',          'Array.prototype',
-    'Boolean',        'Boolean.prototype',
-    'Date',           'Date.prototype',
-    'Error',          'Error.prototype',
-    'EvalError',      'EvalError.prototype',
-    'Function',       'Function.prototype',
+    'Object',           'Object.prototype',
+    'Array',            'Array.prototype',
+    'Function',         'Function.prototype',
+    'Date',             'Date.prototype',
+    'RegExp',           'RegExp.prototype',
+    'Number',           'Number.prototype',
+    'Boolean',          'Boolean.prototype',
+    'String',           'String.prototype',
+    'Math',
+    'JSON',
+    'eval',
+    'decodeURI',        'decodeURIComponent',
+    'encodeURI',        'encodeURIComponent',
+    'escape',           'unescape',
+    'isFinite',         'isNaN',
+    'parseFloat',       'parseInt',
+    'Error',            'Error.prototype',
+    'URIError',         'URIError.prototype',
+    'TypeError',        'TypeError.prototype',
+    'EvalError',        'EvalError.prototype',
+    'RangeError',       'RangeError.prototype',
+    'SyntaxError',      'SyntaxError.prototype',
+    'ReferenceError',   'ReferenceError.prototype',
     'Map',            'Map.prototype',
-    'Number',         'Number.prototype',
-    'Object',         'Object.prototype',
     'Proxy',          'Proxy.prototype',
-    'RangeError',     'RangeError.prototype',
-    'ReferenceError', 'ReferenceError.prototype',
-    'RegExp',         'RegExp.prototype',
     'Set',            'Set.prototype',
-    'String',         'String.prototype',
-    'SyntaxError',    'SyntaxError.prototype',
-    'TypeError',      'TypeError.prototype',
-    'URIError',       'URIError.prototype',
-    'WeakMap',        'WeakMap.prototype',
-    
-    'Math', 'JSON', 'eval',
-    
-    'decodeURI',  'decodeURIComponent',
-    'encodeURI',  'encodeURIComponent',
-    'escape',     'unescape',
-    'isFinite',   'isNaN',
-    'parseFloat', 'parseInt'
-  ];
-  var builtInObjects= builtInPaths.map(function (v,i,o) {
+    'WeakMap',        'WeakMap.prototype'
+  ].filter(function (v,i,o) {
     'use strict';
-    return eval(v);
+    try {
+      builtInObjects.push( eval(v) );
+      //console.log("SI -> "+ v);
+      return true;
+    }
+    catch (e) {
+      //console.log("NO -> "+ v);
+      return false;
+    }
   });
 
   var seen, paths, i= 0;
@@ -118,7 +126,7 @@
           else if (char === 34) {
             oo+= '\\"';
           }
-          else if (char === 91) {
+          else if (char === 92) {
             oo+= '\\\\';
           }
           else {
@@ -126,7 +134,7 @@
           }
           i++;
         }
-        return '\"'+ oo+ '\"';
+        return '"'+ oo+ '"';
       }
 
       return 'null';
@@ -262,6 +270,7 @@
 
 
   function parse (t) {
+    'use strict';
     return eval( '('+ t+ ')' );
   }
   
