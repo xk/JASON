@@ -1,7 +1,7 @@
 // Copyright (c) 2011 Jorge Chamorro Bieling  <jorge@jorgechamorro.com>
 // MIT License
 
-(function (exports) {
+var JASON = (function (exports) {
   'use strict';
   
   var builtInObjects= [];
@@ -275,5 +275,5 @@
   
   exports.stringify= stringify;
   exports.parse= parse;
-  
-})(typeof exports !== 'undefined' ? exports : (window.JASON = window.JASON || {}));
+  return exports;
+})(typeof exports !== 'undefined' ? exports : {});
