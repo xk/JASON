@@ -78,7 +78,7 @@ var JASON = (function (exports) {
   function stringify (o) {
     'use strict';
     var cyclic, ademas;
-    var r= strfy(o, 'o', builtInObjects, builtInPaths, [], [], cyclic= [], ademas= []);
+    var r= strfy(o, 'o', stringify.builtInObjects, stringify.builtInPaths, [], [], cyclic= [], ademas= []);
     
     if (cyclic.length || ademas.length) {
       
@@ -99,15 +99,17 @@ var JASON = (function (exports) {
   }
 
 
-  function isPrimitive (type, o) {
-    'use strict';
-    return ((type === 'number') || (type === 'string') || (type === 'undefined') || (o === null) || (type === 'boolean'));
-  }
+
 
 
   function strfy (o, path, builtInObjects, builtInPaths, seen, paths, cyclic, ademas) {
     'use strict';
-    
+
+    function isPrimitive (type, o) {
+      'use strict';
+      return ((type === 'number') || (type === 'string') || (type === 'undefined') || (o === null) || (type === 'boolean'));
+    }
+
     var type= typeof o;
     if (isPrimitive(type, o)) {
       if (type === 'number') return ''+ o;
@@ -273,7 +275,10 @@ var JASON = (function (exports) {
     return Function("t", "return eval( '('+ t+ ')' );")(t);
   }
   
-  exports.stringify= stringify;
+  stringify.strfy= strfy;
+  stringify.builtInPaths= builtInPaths;
+  stringify.builtInObjects= builtInObjects;
   exports.parse= parse;
+  exports.stringify= stringify;
   return exports;
 })(typeof exports !== 'undefined' ? exports : {});
