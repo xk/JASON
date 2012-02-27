@@ -75,10 +75,10 @@ var JASON = (function (exports) {
 
   seen= paths= null;
 
-  function stringify (o) {
+  function stringify (o, cache) {
     'use strict';
     var cyclic, ademas;
-    var r= strfy(o, 'o', builtInObjects, builtInPaths, [], [], cyclic= [], ademas= []);
+    var r= strfy(o, 'o', builtInObjects, builtInPaths, [], [], cyclic= [], ademas= [], cache);
     
     if (cyclic.length || ademas.length) {
       
@@ -105,7 +105,7 @@ var JASON = (function (exports) {
   }
 
 
-  function strfy (o, path, builtInObjects, builtInPaths, seen, paths, cyclic, ademas) {
+  function strfy (o, path, builtInObjects, builtInPaths, seen, paths, cyclic, ademas, cache) {
     'use strict';
     
     var type= typeof o;
@@ -168,7 +168,7 @@ var JASON = (function (exports) {
         var where= keys.indexOf(''+ i);
         if (where >= 0) {
           delete keys[where];
-          t.push(strfy(o[i], path+ '['+ i+ ']', builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
+          t.push(strfy(o[i], path+ '['+ i+ ']', builtInObjects, builtInPaths, seen, paths, cyclic, ademas, cache));
         }
         else {
           t.push('');
@@ -183,7 +183,7 @@ var JASON = (function (exports) {
       //Propiedades adicionales
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
-        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
+        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas, cache));
       });
       
       
@@ -200,9 +200,9 @@ var JASON = (function (exports) {
       
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
-        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
+        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas, cache));
       });
-      
+
       if ((o+'').replace(o.name,'') === nativeCode) {
         return (o+'').replace(/(\[native code\])/, '"$1";');
       }
@@ -219,7 +219,7 @@ var JASON = (function (exports) {
       
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
-        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
+        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas, cache));
       });
       
       return 'new Date('+ (+o)+ ')';
@@ -234,7 +234,7 @@ var JASON = (function (exports) {
       
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
-        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
+        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas, cache));
       });
       
       return ''+ o;
@@ -249,7 +249,7 @@ var JASON = (function (exports) {
       
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
-        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
+        ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas, cache));
       });
       
       return ''+ o;
@@ -260,20 +260,55 @@ var JASON = (function (exports) {
     var keys= Object.getOwnPropertyNames(o).filter(function (v,i,o) {
       return (defaultKeys.indexOf(v) < 0);
     });
-
     var t= [];
     keys.forEach(function (k) {
-      t.push('\"'+ k+ '\":'+ strfy(o[k], path+ '[\"'+ k+ '\"]', builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
+      t.push('\"'+ k+ '\":'+ strfy(o[k], path+ '[\"'+ k+ '\"]', builtInObjects, builtInPaths, seen, paths, cyclic, ademas, cache));
     });
-    return '{'+ t.join(',')+ '}';
+    var hash = '{'+ t.join(',')+ '}';
+    if (!cache) return hash;
+
+    var proto = Object.getPrototypeOf(o), i = cache.indexOf(proto), protoStr;
+    if (i < 0) {
+      i = cache.length;
+      cache.push(proto);
+      protoStr = "(cache[" + i + "]=" + strfy(proto, "cache[" + i + "]", builtInObjects, builtInPaths, seen, paths, cyclic, ademas, cache) + ")";
+    } else {
+      protoStr = "cache[" + i + "]";
+    }
+    return "make(" + protoStr + "," + hash + ")";
   }
 
 
   function parse (t) {
     return Function("t", "return eval( '('+ t+ ')' );")(t);
   }
+
+  function channel() {
+    var cache = [], token;
+    return {
+      stringify: function(o) {
+        token = token || ("" + Math.random());
+        return 'verify("' + token + '",' + cache.length + '),' + stringify(o, cache)
+      },
+      parse: function(t) {
+        function verify(tok, len) {
+          if ((token && token !== tok) || cache.length !== len)
+            throw new Error("JASON cache mismatch");
+          token = tok;
+        }
+        function make(proto, hash) {
+          var o = Object.create(proto);
+          Object.keys(hash).forEach(function(k) { o[k] = hash[k]; });
+          return o;
+        }
+        return eval("(" + t + ")");
+      },
+      channel: channel
+    }
+  }
   
   exports.stringify= stringify;
   exports.parse= parse;
+  exports.channel= channel;
   return exports;
 })(typeof exports !== 'undefined' ? exports : {});
