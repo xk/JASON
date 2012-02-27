@@ -78,7 +78,7 @@ var JASON = (function (exports) {
   function stringify (o) {
     'use strict';
     var cyclic, ademas;
-    var r= strfy(o, 'o', stringify.builtInObjects, stringify.builtInPaths, [], [], cyclic= [], ademas= []);
+    var r= stringify.strfy(o, 'o', stringify.builtInObjects, stringify.builtInPaths, [], [], cyclic= [], ademas= []);
     
     if (cyclic.length || ademas.length) {
       
