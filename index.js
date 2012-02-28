@@ -78,7 +78,7 @@ var JASON = (function (exports) {
   function stringify (o) {
     'use strict';
     var cyclic, ademas;
-    var r= stringify.strfy(o, 'o', stringify.builtInObjects, stringify.builtInPaths, [], [], cyclic= [], ademas= []);
+    var r= stringify.this._strfy(o, 'o', stringify.this._builtInObjects, stringify.this._builtInPaths, [], [], cyclic= [], ademas= []);
     
     if (cyclic.length || ademas.length) {
       
@@ -272,12 +272,15 @@ var JASON = (function (exports) {
 
 
   function parse (t) {
-    return Function("t", "return eval( '('+ t+ ')' );")(t);
+    var globalEval= eval;
+    return globalEval( '('+ t+ ')' );
   }
   
-  stringify.strfy= strfy;
-  stringify.builtInPaths= builtInPaths;
-  stringify.builtInObjects= builtInObjects;
+  parse.this= exports;
+  stringify.this= exports;
+  exports._strfy= strfy;
+  exports._builtInPaths= builtInPaths;
+  exports._builtInObjects= builtInObjects;
   exports.parse= parse;
   exports.stringify= stringify;
   return exports;
