@@ -1,6 +1,6 @@
 ## JASON
 
-JASON is just like JSON, but with an A. D'oh. ^N
+JASON is just like JSON, but with an A. D'oh. ^U
 
 JASON is just like JSON, but unlike JSON it can:
 
