@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/xk/JASON.png)](http://travis-ci.org/xk/JASON)
 ## JASON
 
 JASON is just like JSON, but with an A. D'oh. ^U
