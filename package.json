@@ -18,6 +18,6 @@
     "url": "http://github.com/xk/JASON.git"
   },
   "scripts": {
-    "test": "node test/test01"
+    "test": "node test"
   }
 }
