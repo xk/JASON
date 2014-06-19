@@ -3,7 +3,7 @@
 
 var JASON = (function (exports) {
   'use strict';
-  
+
   var builtInObjects= [];
   var builtInPaths= [
     'Object',           'Object.prototype',
@@ -49,12 +49,12 @@ var JASON = (function (exports) {
   var seen, paths, i= 0;
   while (i < builtInObjects.length) {
     //process.stdout.write('Analizando -> '+ builtInPaths[i]+ '\n');
-    
+
     strfy(builtInObjects[i], builtInPaths[i], [], [], seen= [], paths= [], [], []);
-    
+
     //console.log(seen);
     //console.log(paths);
-    
+
     seen.forEach(function (v,i,o) {
       'use strict';
       //process.stdout.write('Comprobando -> '+ paths[i]+ '\n');
@@ -79,22 +79,22 @@ var JASON = (function (exports) {
     'use strict';
     var cyclic, ademas;
     var r= stringify.this._strfy(o, 'o', stringify.this._builtInObjects, stringify.this._builtInPaths, [], [], cyclic= [], ademas= []);
-    
+
     if (cyclic.length || ademas.length) {
-      
+
       var txt= '(function(o){\n';
-      
+
       if (ademas.length) {
         txt+= "/* Additional properties */\n"+ ademas.join(';\n')+ ';\n';
       }
-      
+
       if (cyclic.length) {
         txt+= "/* Cyclic properties */\n"+ cyclic.join(';\n')+ ';\n';
       }
-      
+
       return txt+ 'return o;\n})('+ r+ ')';
     }
-    
+
     return r;
   }
 
@@ -144,7 +144,7 @@ var JASON = (function (exports) {
 
     var where= builtInObjects.indexOf(o);
     if (where >= 0) return builtInPaths[where];
-    
+
     where= seen.indexOf(o);
     if (where >= 0) {
       //console.log('*** SEEN   -> '+ paths[where]);
@@ -165,7 +165,7 @@ var JASON = (function (exports) {
       var keys= Object.getOwnPropertyNames(o).filter(function (v,i,o) {
         return (defaultKeys.indexOf(v) < 0);
       });
-      
+
       while (i < o.length) {
         var where= keys.indexOf(''+ i);
         if (where >= 0) {
@@ -187,8 +187,8 @@ var JASON = (function (exports) {
         var p= '[\"'+ k+ '\"]';
         ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
       });
-      
-      
+
+
       return '['+ t.join(',')+ ']';
     }
 
@@ -199,16 +199,16 @@ var JASON = (function (exports) {
       var keys= Object.getOwnPropertyNames(o).filter(function (v,i,o) {
         return (defaultKeys.indexOf(v) < 0);
       });
-      
+
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
         ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
       });
-      
+
       if ((o+'').replace(o.name,'') === nativeCode) {
         return (o+'').replace(/(\[native code\])/, '"$1";');
       }
-      
+
       return (o.name) ? ''+ o : '('+ o+ ')';
     }
 
@@ -218,12 +218,12 @@ var JASON = (function (exports) {
       var keys= Object.getOwnPropertyNames(o).filter(function (v,i,o) {
         return (defaultKeys.indexOf(v) < 0);
       });
-      
+
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
         ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
       });
-      
+
       return 'new Date('+ (+o)+ ')';
     }
 
@@ -233,12 +233,12 @@ var JASON = (function (exports) {
       var keys= Object.getOwnPropertyNames(o).filter(function (v,i,o) {
         return (defaultKeys.indexOf(v) < 0);
       });
-      
+
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
         ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
       });
-      
+
       return ''+ o;
     }
 
@@ -248,12 +248,12 @@ var JASON = (function (exports) {
       var keys= Object.getOwnPropertyNames(o).filter(function (v,i,o) {
         return (defaultKeys.indexOf(v) < 0);
       });
-      
+
       keys.forEach(function (k) {
         var p= '[\"'+ k+ '\"]';
         ademas.push(path+ p+ '= '+ strfy(o[k], path+ p, builtInObjects, builtInPaths, seen, paths, cyclic, ademas));
       });
-      
+
       return ''+ o;
     }
 
@@ -275,7 +275,7 @@ var JASON = (function (exports) {
     var globalEval= eval;
     return globalEval( '('+ t+ ')' );
   }
-  
+
   parse.this= exports;
   stringify.this= exports;
   exports._strfy= strfy;

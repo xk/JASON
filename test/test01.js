@@ -1,12 +1,9 @@
-
-
 var JASON = require('JASON');
-
 
 function assert (c,d) {
   if (c === d || (d === undefined && !!c === true)) {
     console.log("ASSERTION -> OK");
-    
+
   } else if (c !== d) {
     var err = new Error("Assertion FAILED");
     var info = err.stack.split('\n').slice(2,3)[0].slice(0,-1).split(':').slice(-2);

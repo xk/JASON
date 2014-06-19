@@ -16,7 +16,7 @@ Warning: unlike JSON, JASON is *unsafe*. You should only use it in contexts wher
 
 ## Syntax
 
-JASON syntax is just plain JavaScript (but not JSON). 
+JASON syntax is just plain JavaScript (but not JSON).
 
 The `stringify` function does the clever work of generating whatever Javascript is needed to recreate the object, and the `parse` function is just a call to `eval`.
 
