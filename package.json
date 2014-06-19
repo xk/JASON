@@ -18,6 +18,11 @@
     "url": "http://github.com/xk/JASON.git"
   },
   "scripts": {
-    "test": "node test"
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "coffee-script": "^1.7.1",
+    "mocha": "^1.20.1",
+    "should": "^4.0.4"
   }
 }
