@@ -16,5 +16,8 @@
   "repository": {
     "type": "git",
     "url": "http://github.com/xk/JASON.git"
+  },
+  "scripts": {
+    "test": "node test/test01"
   }
 }

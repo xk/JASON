@@ -1,4 +1,4 @@
-var JASON = require('JASON');
+var JASON = require('../');
 
 function assert (c,d) {
   if (c === d || (d === undefined && !!c === true)) {
